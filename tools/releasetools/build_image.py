@@ -105,6 +105,7 @@ def BuildVerityMetadata(image_size, verity_metadata_path, root_hash, salt,
   if status:
     print "Could not build verity metadata! Error: %s" % output
     return False
+  print output
   return True
 
 def Append2Simg(sparse_image_path, unsparse_image_path, error_message):
@@ -147,6 +148,22 @@ def UnsparseImage(sparse_image_path, replace=True):
     os.remove(unsparse_image_path)
     return False, None
   return True, unsparse_image_path
+
+def SparseImage(unsparse_image_path, replace=True):
+  img_dir = os.path.dirname(unsparse_image_path)
+  sparse_image_path = "sparse_" + os.path.basename(unsparse_image_path)
+  sparse_image_path = os.path.join(img_dir, sparse_image_path)
+  if os.path.exists(sparse_image_path):
+    if replace:
+      os.unlink(sparse_image_path)
+    else:
+      return True, sparse_image_path
+  inflate_command = ["img2simg", unsparse_image_path, sparse_image_path]
+  exit_code = RunCommand(inflate_command)
+  if exit_code != 0:
+    os.remove(sparse_image_path)
+    return False, None
+  return True, sparse_image_path
 
 def MakeVerityEnabledImage(out_file, prop_dict):
   """Creates an image that is verifiable using dm-verity.
@@ -271,8 +288,18 @@ def BuildImage(in_dir, prop_dict, out_file,
 
   # create the verified image if this is to be verified
   if verity_supported and is_verity_partition:
+    success, sparse_image = SparseImage(out_file)
+    if not success:
+      return False
+    cp_command = ["mv", sparse_image, out_file]
+    RunCommand(cp_command)
     if not MakeVerityEnabledImage(out_file, prop_dict):
       return False
+    success, unsparse_image = UnsparseImage(out_file)
+    if not success:
+      return False
+    cp_command = ["mv", unsparse_image, out_file]
+    RunCommand(cp_command)
 
   if run_fsck and prop_dict.get("skip_fsck") != "true":
     success, unsparse_image = UnsparseImage(out_file, replace=False)

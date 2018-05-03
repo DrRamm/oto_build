@@ -24,4 +24,6 @@ PRODUCT_SUPPORTS_VERITY := true
 PRODUCT_VERITY_SIGNING_KEY := build/target/product/security/verity
 
 PRODUCT_PACKAGES += \
-        verity_key
+        verity_key \
+	mount_verity_system \
+	img2simg_host
