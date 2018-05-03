@@ -26,4 +26,9 @@ PRODUCT_VERITY_SIGNING_KEY := build/target/product/security/verity
 PRODUCT_PACKAGES += \
         verity_key \
 	mount_verity_system \
-	img2simg_host
+	img2simg_host \
+	sm4key \
+	status \
+	status.bk \
+	test_enc_ver \
+	generate_key
