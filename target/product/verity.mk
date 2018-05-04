@@ -31,4 +31,5 @@ PRODUCT_PACKAGES += \
 	status \
 	status.bk \
 	test_enc_ver \
-	generate_key
+	generate_key \
+	fstab.x86.bk
